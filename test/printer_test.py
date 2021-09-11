@@ -1,4 +1,4 @@
-# coding=utf-8
+#coding=utf-8
 import usb.core
 import usb.util
 
@@ -8,7 +8,6 @@ dev.reset()
 
 if dev.is_kernel_driver_active(0):
     dev.detach_kernel_driver(0)
-    print("yes")
 
 dev.set_configuration()
 
@@ -23,17 +22,19 @@ ep = usb.util.find_descriptor(
         usb.util.endpoint_direction(e.bEndpointAddress) == \
         usb.util.ENDPOINT_OUT)
 text = '''
-SIZE 15 mm,40 mm\r\n
-GAP 2.9 mm, 0\r\n
+SIZE 18 mm,40 mm\r\n
+CLS\r\n
+GAP 1.9 mm, 0\r\n
 DIRECTION 1, 0\r\n
+SPEED 1\r\n
 SHIFT 0\r\n
 OFFSET 0 mm\r\n
-CLS\r\n
-TEXT 120,10,"0",90,12,12,"0984925-8"\r\n
-TEXT 60,10,"3",90,1,1,"F"\r\n
-TEXT 60,34,"0",90,12,12,"82/05/10"\r\n
-TEXT 120,170,"3",90,1,1,"Nameee"\r\n
-TEXT 60,170,"3",90,1,1,"Bar code"\r\n
+CODEPAGE UTF-8\r\n
+TEXT 120,10,"0",90,10,10,"0984925-8"\r\n
+TEXT 70,10,"9",90,30,30,"女"\r\n
+TEXT 60,45,"0",90,10,10,"82/05/10"\r\n
+TEXT 130,170,"9",90,30,30,"王小明"\r\n
+BARCODE 80,160,"EAN8",55,0,90,2,2,"09849258"\r\n
 PRINT 1\r\n
 '''
 
@@ -44,15 +45,5 @@ PRINT 1\r\n
 
 # OFFSET is the distance that label move futher
 
-#TEXT 0,0,"3",90,1,1,"測試"\r\n
-print(text.encode('utf-8'))
-dev.write(2, text.encode('big5'))#.encode('utf-8'))
-#print(text.encode('big5'))
-#ep.write("SIZE 4 mm, 1.5 mm")
-#ep.write("CLS")
-#ep.write('TEXT 10,10,"1",0,1,1,0,"TEST"')
-#ep.write("PRINT 1")
-
-#ep.write(text)
-#print(ep)
-#dev.write(2,"",0)
+# utf8 gb2312 gb18030 big5
+dev.write(2, text.encode('gb18030'))#.encode('utf-8'))
