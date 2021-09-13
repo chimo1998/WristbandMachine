@@ -19,7 +19,8 @@ class Printer:
 
         self.dev = dev
 
-    def __call__(self, _id, sex, birth, name):
+    def __call__(self, data):
+        (_id, sex, birth, name) = data
         text = '''
         SIZE 18 mm, 40 mm\r\n
         CLS\r\n

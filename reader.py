@@ -23,12 +23,11 @@ class Reader:
 
         card_num = ''.join(chr(i) for i in data[0:12])
         if card_num == self.previous_card_num:
-            return None
+            return "same"
 
         self.previous_card_num = card_num
 
         namecount = sum([0 if a==0 else 1 for a in data[12:32]])
-        print(namecount)
         name = '{}'.format(bytes(data[12:(12+namecount+namecount%2)]).decode('big5'))
         id_num = ''.join(chr(i) for i in data[32:42])
         case_num = self.id_to_case(id_num)
