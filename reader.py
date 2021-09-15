@@ -6,7 +6,12 @@ ReadProfileAPDU = [ 0x00, 0xca, 0x11, 0x00, 0x02, 0x00, 0x00 ]
 class Reader:
     def __init__(self):
         self.previous_card_num = ""
-        r = readers()
+        r = None
+        while r == None or len(r) == 0:
+            try:
+                r = readers()
+            except Exception:
+                continue
         reader = r[0]
         self.reader = reader
 
@@ -18,12 +23,17 @@ class Reader:
         except Exception:
             self.previous_card_num = ""
             return None
-        data, sw1, sw2 = conn.transmit(SelectAPDU)
-        data, sw1, sw2 = conn.transmit(ReadProfileAPDU)
+        try:
+            data, sw1, sw2 = conn.transmit(SelectAPDU)
+            data, sw1, sw2 = conn.transmit(ReadProfileAPDU)
+        except Exception:
+            print("Transmit error")
+            return None
 
         card_num = ''.join(chr(i) for i in data[0:12])
         if card_num == self.previous_card_num:
             return "same"
+            #return None
 
         self.previous_card_num = card_num
 

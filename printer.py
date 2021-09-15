@@ -6,7 +6,12 @@ idProduct = 0x7007
 sexual = ['女'.encode('gb18030'),'男'.encode('gb18030')]
 class Printer:
     def __init__(self):
-        dev = usb.core.find(idVendor=idVendor, idProduct=idProduct)
+        dev = None
+        while dev == None:
+            try:
+                dev = usb.core.find(idVendor=idVendor, idProduct=idProduct)
+            except Exception:
+                continue
         dev.reset()
 
         if dev.is_kernel_driver_active(0):
@@ -14,8 +19,8 @@ class Printer:
 
         dev.set_configuration()
 
-        cfg = dev.get_active_configuration()
-        cfg.set()
+        #cfg = dev.get_active_configuration()
+        #cfg.set()
 
         self.dev = dev
 
