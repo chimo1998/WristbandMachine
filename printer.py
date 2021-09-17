@@ -25,7 +25,7 @@ class Printer:
         self.dev = dev
 
     def __call__(self, data):
-        (_id, sex, birth, name) = data
+        (_id, sex, birth, name, case_num) = data
         text = '''
         SIZE 18 mm, 40 mm\r\n
         CLS\r\n
@@ -41,6 +41,6 @@ class Printer:
         TEXT 130,170,"9",90,30,30,"%s"\r\n
         BARCODE 80,160,"EAN8",55,0,90,2,2,"%s"\r\n
         PRINT 1\r\n
-        ''' % (_id, sexual[sex].decode('gb18030'), birth, name, _id)
+        ''' % (case_num, sexual[sex].decode('gb18030'), birth, name, case_num)
 
         self.dev.write(2, text.encode('gb18030'))

@@ -40,11 +40,6 @@ class Reader:
         namecount = sum([0 if a==0 else 1 for a in data[12:32]])
         name = '{}'.format(bytes(data[12:(12+namecount+namecount%2)]).decode('big5'))
         id_num = ''.join(chr(i) for i in data[32:42])
-        case_num = self.id_to_case(id_num)
         birth = '%s/%s/%s' % (''.join(chr(i) for i in data[43:45]), ''.join(chr(i) for i in data[45:47]), ''.join(chr(i) for i in data[47:49]))
         sex = 1 if ''.join(chr(i) for i in data[49:50]) == "M" else 0
-        return (case_num, sex, birth, name)
-
-    def id_to_case(self, _id):
-        # Search
-        return "00000" + _id[4:7]
+        return (id_num, sex, birth, name)

@@ -3,7 +3,9 @@ from printer import Printer
 import time
 from motor import Motor12v, Motor24v
 import RPi.GPIO as gpio
-
+import pygame
+import hashlib
+import json
 
 led = 25
 red_led = 10
@@ -13,6 +15,32 @@ hum1 = 23
 hum2 = 24
 
 band = 15
+
+sounddir = "sound"
+
+CASE_URL = "https://webf.cych.org.tw/IpdInfo/api/PatSmpInfo?id1=%s&id2=%s&Key=%s"
+CASE_VAR = "1"
+CASE_BASE_HASH = "tPptRZeYS5472rEoZBd48QmkxU2Sofu5kcoHnFjHGyqt7ltKSyKHLlnUCex54ULF"
+
+temp = False
+def get_case_num(id_num):
+    con = "%s^%s^%s" % (CASE_BASE_HASH, CASE_VAR, id_num)
+    sha1 = hashlib.sha1()
+    sha1.update(con.encode('utf-8'))
+    hashed = sha1.hexdigest()
+    try:
+        r = requests.get(CASE_URL % (CASE_VAR, id_num, hashed))
+        mj = r.json()
+        print(mj)
+        # return mj["pat_no"]
+        return "01234567"
+    except:
+        global temp
+        print(temp)
+        temp = not temp
+        if temp:
+            return "01234567"
+        return None
 
 bb_motor = Motor24v(720, 19, 26)
 bs_motor = Motor24v(2880, 5, 6)
@@ -33,6 +61,11 @@ gpio.setwarnings(False)
 
 gpio.output(red_led, gpio.HIGH)
 gpio.output(green_led, gpio.LOW)
+
+# setup sound
+pygame.mixer.init(16000)
+pygame.mixer.music.set_volume(1.0)
+
 while(True):
     try:
         print("in main")
@@ -44,6 +77,20 @@ while(True):
                 data = None
                 continue
 
+        # get case number from server
+        case_num = get_case_num(data[0])
+        if case_num == None:  # case not found
+            pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/caseNotFound.mp3")
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy():
+                pass
+            continue
+        # case found
+        pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/caseFound.mp3")
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pass
+        data = data + (case_num,)
         print(data)
         gpio.output(led, gpio.LOW)
         # bb roll front
@@ -51,7 +98,7 @@ while(True):
         # v12 roll down
         v12.spin(-1, 1)
         # bs roll in
-        #bs_motor.spin(1, 0.4)
+        bs_motor.spin(1, 0.4)
         # print
         printer(data)
         time.sleep(1.3)
@@ -66,12 +113,19 @@ while(True):
         # power up straper
         gpio.output(green_led, gpio.HIGH)
         gpio.output(red_led, gpio.LOW)
+        # start checking hand
         while (gpio.input(hum1) or gpio.input(hum2)):
             time.sleep(0.1)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
         gpio.output(band, gpio.HIGH)
         time.sleep(1)
+
+        pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/finish.mp3")
+        pygame.mixer.music.play()
+        while pygame.mixer.music.get_busy():
+            pass
+
         while not ((gpio.input(hum1) and gpio.input(hum2))):
             time.sleep(0.1)
         gpio.output(green_led, gpio.LOW)
