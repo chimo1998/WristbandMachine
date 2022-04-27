@@ -14,7 +14,7 @@ green_led = 9
 hum1 = 23
 hum2 = 24
 
-band = 15
+band = 16
 
 sounddir = "sound"
 
@@ -63,8 +63,15 @@ gpio.output(red_led, gpio.HIGH)
 gpio.output(green_led, gpio.LOW)
 
 # setup sound
-pygame.mixer.init(16000)
+pygame.mixer.init(44200)
 pygame.mixer.music.set_volume(1.0)
+
+music_dir = "/home/pi/desktop/WristbandMachine/sound/"
+def play_sound(f):
+    pygame.mixer.music.load(music_dir+f)
+    pygame.mixer.music.play()
+
+aat = 0
 
 while(True):
     try:
@@ -79,17 +86,15 @@ while(True):
 
         # get case number from server
         case_num = get_case_num(data[0])
-        if case_num == None:  # case not found
-            pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/caseNotFound.mp3")
-            pygame.mixer.music.play()
-            while pygame.mixer.music.get_busy():
-                pass
+        print(data)
+        aat = 1-aat
+        if aat==1 and not case_num == None:  # case not found
+            play_sound("1.mp3")
             continue
+
         # case found
-        pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/caseFound.mp3")
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            pass
+        play_sound("2.mp3")
+
         data = data + (case_num,)
         print(data)
         gpio.output(led, gpio.LOW)
@@ -105,7 +110,7 @@ while(True):
         # bs roll out
         bs_motor.spin(0, 1)
         # bs roll in
-        bs_motor.spin(1, 1)
+        #bs_motor.spin(1, 1)
         # v12 roll up
         v12.spin(1, 1)
         # bb roll back
@@ -115,25 +120,32 @@ while(True):
         gpio.output(red_led, gpio.LOW)
         # start checking hand
         while (gpio.input(hum1) or gpio.input(hum2)):
+            pygame.mixer.music.load(music_dir+"3.mp3")
+            pygame.mixer.music.play()
+            while pygame.mixer.music.get_busy() and (( gpio.input(hum1) or gpio.input(hum2) )):
+                pass
             time.sleep(0.1)
+        pygame.mixer.music.stop()
+        time.sleep(2)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
         gpio.output(band, gpio.HIGH)
         time.sleep(1)
 
-        pygame.mixer.music.load("/home/pi/work/WristbandMachine/sound/finish.mp3")
-        pygame.mixer.music.play()
-        while pygame.mixer.music.get_busy():
-            pass
-
         while not ((gpio.input(hum1) and gpio.input(hum2))):
             time.sleep(0.1)
+
         gpio.output(green_led, gpio.LOW)
         gpio.output(red_led, gpio.HIGH)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
         gpio.output(band, gpio.HIGH)
         time.sleep(1)
+
+        play_sound("4.mp3")
+
+    except KeyboardInterrupt:
+        break
 
     except Exception:
         time.sleep(2)

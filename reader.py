@@ -10,6 +10,8 @@ class Reader:
         while r == None or len(r) == 0:
             try:
                 r = readers()
+            except KeyboardInterrupt:
+                break
             except Exception:
                 continue
         reader = r[0]

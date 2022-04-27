@@ -10,6 +10,8 @@ class Printer:
         while dev == None:
             try:
                 dev = usb.core.find(idVendor=idVendor, idProduct=idProduct)
+            except KeyboardInterrupt:
+                break
             except Exception:
                 continue
         dev.reset()
@@ -26,6 +28,7 @@ class Printer:
 
     def __call__(self, data):
         (_id, sex, birth, name, case_num) = data
+        case_num = _id[2:]
         text = '''
         SIZE 18 mm, 40 mm\r\n
         CLS\r\n
