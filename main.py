@@ -126,23 +126,23 @@ while(True):
                 pass
             time.sleep(0.1)
         pygame.mixer.music.stop()
-        time.sleep(2)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
+        play_sound("4.mp3")
         gpio.output(band, gpio.HIGH)
-        time.sleep(1)
+        time.sleep(2)
 
         while not ((gpio.input(hum1) and gpio.input(hum2))):
             time.sleep(0.1)
 
         gpio.output(green_led, gpio.LOW)
         gpio.output(red_led, gpio.HIGH)
+        time.sleep(2)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
         gpio.output(band, gpio.HIGH)
         time.sleep(1)
 
-        play_sound("4.mp3")
 
     except KeyboardInterrupt:
         break
