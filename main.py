@@ -137,7 +137,7 @@ while(True):
 
         gpio.output(green_led, gpio.LOW)
         gpio.output(red_led, gpio.HIGH)
-        time.sleep(2)
+        time.sleep(5)
         gpio.output(band, gpio.LOW)
         time.sleep(1)
         gpio.output(band, gpio.HIGH)
