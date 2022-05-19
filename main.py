@@ -6,6 +6,7 @@ import RPi.GPIO as gpio
 import pygame
 import hashlib
 import json
+import requests
 
 led = 25
 red_led = 10
@@ -22,7 +23,6 @@ CASE_URL = "https://webf.cych.org.tw/IpdInfo/api/PatSmpInfo?id1=%s&id2=%s&Key=%s
 CASE_VAR = "1"
 CASE_BASE_HASH = "tPptRZeYS5472rEoZBd48QmkxU2Sofu5kcoHnFjHGyqt7ltKSyKHLlnUCex54ULF"
 
-temp = False
 def get_case_num(id_num):
     con = "%s^%s^%s" % (CASE_BASE_HASH, CASE_VAR, id_num)
     sha1 = hashlib.sha1()
@@ -30,16 +30,11 @@ def get_case_num(id_num):
     hashed = sha1.hexdigest()
     try:
         r = requests.get(CASE_URL % (CASE_VAR, id_num, hashed))
-        mj = r.json()
+        mj = r.json()[0]
         print(mj)
-        # return mj["pat_no"]
-        return "01234567"
-    except:
-        global temp
-        print(temp)
-        temp = not temp
-        if temp:
-            return "01234567"
+        return mj["pat_no"]
+    except Exception as e:
+        print(e)
         return None
 
 bb_motor = Motor24v(720, 19, 26)
@@ -87,8 +82,7 @@ while(True):
         # get case number from server
         case_num = get_case_num(data[0])
         print(data)
-        aat = 1-aat
-        if aat==1 and not case_num == None:  # case not found
+        if case_num == None or case_num == 0:  # case not found
             play_sound("1.mp3")
             continue
 
