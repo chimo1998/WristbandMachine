@@ -32,7 +32,7 @@ def get_case_num(id_num):
         r = requests.get(CASE_URL % (CASE_VAR, id_num, hashed))
         mj = r.json()[0]
         print(mj)
-        return mj["pat_no"]
+        return str(mj["pat_no"])
     except Exception as e:
         print(e)
         return None
@@ -82,9 +82,11 @@ while(True):
         # get case number from server
         case_num = get_case_num(data[0])
         print(data)
-        if case_num == None or case_num == 0:  # case not found
+        if case_num == 0:  # case not found
             play_sound("1.mp3")
             continue
+        elif case_num == None: # get case failed
+            case_num = data[0][2:10]
 
         # case found
         play_sound("2.mp3")
